@@ -2,13 +2,18 @@
 #include "window_glfw.h"
 #include "joystick_manager_glfw.h"
 #include <stdexcept>
+#include <string>
 
 GLFWWindowManager::GLFWWindowManager() {
     // To create a default mapping for not mapped Gamepads
     // to avoid subtracting heads from buttons again
     glfwInitHint(GLFW_JOYSTICK_HAT_BUTTONS, 0);
-    if (glfwInit() != GLFW_TRUE)
-        throw std::runtime_error("glfwInit error");
+    if (glfwInit() != GLFW_TRUE) {
+        // Report the platform reason (missing display, unsupported session) instead of a bare failure.
+        const char* description = nullptr;
+        glfwGetError(&description);
+        throw std::runtime_error(std::string("glfwInit error: ") + (description ? description : "unknown"));
+    }
     GLFWJoystickManager::init();
 }
 
